@@ -7,15 +7,27 @@ def top_ten(subreddit):
     """Print the titles of the 10 hottest posts on a given subreddit."""
     url = "https://www.reddit.com/r/{}/hot/.json".format(subreddit)
     headers = {
-        "User-Agent": "linux:0x16.api.advanced:v1.0.0 (by /u/bdov_)"
+        "User-Agent": "linux:0x16.api.advanced:v1.0.0 (by /u/your_username)"
     }
     params = {
         "limit": 10
     }
-    response = requests.get(url, headers=headers, params=params,
-                            allow_redirects=False)
+    response = requests.get(url, headers=headers, params=params, allow_redirects=False)
+    
+    # Check for common errors
     if response.status_code == 404:
         print("None")
         return
-    results = response.json().get("data")
-    [print(c.get("data").get("title")) for c in results.get("children")]
+    elif response.status_code == 429:
+        print("Rate limit exceeded. Try again later.")
+        return
+    
+    # Print response content to debug
+    print("Response content:", response.text)
+    
+    try:
+        results = response.json().get("data")
+        [print(c.get("data").get("title")) for c in results.get("children")]
+    except ValueError:
+        print("Failed to parse JSON response")
+
